@@ -7,8 +7,23 @@ from CNN_Classifier.utils.common import get_size
 from CNN_Classifier.entity.config_entity import DataIngestionConfig
 
 class DataIngestion:
+    """
+    class DataIngestion:
+        This class is responsible for downloading the dataset from the url
+        and extracting the data from the zip file into the data directory
+    
+        Args:
+            config (DataIngestionConfig): The configuration object containing the parameters required for data ingestion
+    """
     def __init__(self,config: DataIngestionConfig):
+        """
+        Initializes the DataIngestion object with the given configuration
+
+        Args:
+            config (DataIngestionConfig): The DataIngestionConfig object containing the parameters required for data ingestion
+        """
         self.config = config
+
 
     def download_file(self)->str:
         '''

@@ -24,14 +24,30 @@ class PrepareBaseModel:
     
     @staticmethod
     def _prepare_full_model(model, classes, freeze_all, freeze_till, learning_rate):
+        """
+        Prepare a full model by freezing layers and adding a softmax prediction layer.
+
+        Args:
+            model (tf.keras.Model): The base model to be updated.
+            classes (int): Number of classes in the dataset.
+            freeze_all (bool): Whether to freeze all layers.
+            freeze_till (int): The index of the last layer to be frozen.
+            learning_rate (float): The learning rate for the optimizer.
+
+        Returns:
+            tf.keras.Model: The full model with the softmax prediction layer.
+        """
         if freeze_all:
+            # Freeze all layers
             for layer in model.layers:
-                model.trainable = False
+                layer.trainable = False
         elif (freeze_till is not None) and (freeze_till > 0):
+            # Freeze layers up to the specified index
             for layer in model.layers[:-freeze_till]:
-                model.trainable = False
+                layer.trainable = False
 
         flatten_in = tf.keras.layers.Flatten()(model.output)
+        # Add a softmax prediction layer
         prediction = tf.keras.layers.Dense(
             units=classes,
             activation="softmax"
@@ -48,26 +64,51 @@ class PrepareBaseModel:
             metrics=["accuracy"]
         )
 
+        # Print a summary of the full model
         full_model.summary()
         return full_model
     
 
-    def update_base_model(self):
+    def update_base_model(self) -> None:
+        """
+        Updates the base model and saves it to the specified path.
+
+        Args:
+            self (PrepareBaseModel): The instance of the `PrepareBaseModel` class.
+
+        Returns:
+            None
+        """
         self.full_model = self._prepare_full_model(
             model=self.model,
-            classes=self.config.params_classes,
-            freeze_all=True,
-            freeze_till=None,
-            learning_rate=self.config.params_learning_rate
+            classes=self.config.params_classes,  # type: int
+            freeze_all=True,  # type: bool
+            freeze_till=None,  # type: Optional[int]
+            learning_rate=self.config.params_learning_rate,  # type: float
         )
 
-        self.save_model(path=self.config.updated_base_model_path, model=self.full_model)
+        self.save_model(
+            path=self.config.updated_base_model_path,  # type: Path
+            model=self.full_model,  # type: tf.keras.Model
+        )
     
 
 
     @staticmethod
-    def save_model(path: Path, model: tf.keras.Model):
+    def save_model(path: Path, model: tf.keras.Model) -> None:
+        """
+        Saves the model to the specified path.
+
+        Args:
+            path (Path): The path to save the model.
+            model (tf.keras.Model): The model to be saved.
+
+        Raises:
+            Exception: If an error occurs while saving the model.
+        """
         try:
-         model.save(path)
+            # Save the model to the specified path
+            model.save(path)
         except Exception as e:
-            print(f"error occured in loading the model{path} due to {e}") 
+            # Print an error message if an exception occurs
+            print(f"Error occurred in loading the model {path} due to {e}")
